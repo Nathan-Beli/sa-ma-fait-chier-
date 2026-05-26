@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IA 100% Navigateur</title>
+    <style>
+        body { font-family: sans-serif; background-color: #121212; color: #ffffff; text-align: center; padding: 20px; }
+        .container { background-color: #1e1e1e; padding: 30px; border-radius: 12px; max-width: 600px; margin: 0 auto; }
+        input, button { display: block; width: 90%; margin: 10px auto; padding: 10px; }
+        button { background-color: #bb86fc; border: none; cursor: pointer; font-weight: bold; }
+        button:disabled { background-color: #555; }
+        #status { color: #03dac6; margin: 15px; }
+        #resultatImg { max-width: 100%; margin-top: 20px; border-radius: 8px; }
+    </style>
+    <script type="module">
+        import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.14.0';
+        window.pipeline = pipeline;
+    </script>
+</head>
+<body>
+
+<div class="container">
+    <h1>🎨 IA Locale</h1>
+    <input type="file" id="imageInput" accept="image/*">
+    <input type="text" id="promptInput" placeholder="Ex: A futuristic city, oil painting">
+    <button id="btnLancer" onclick="demarrerIA()">🚀 Générer</button>
+    <div id="status">En attente...</div>
+    <img id="resultatImg" style="display:none;">
+</div>
+
+<script>
+    let generateur = null;
+
+    async function demarrerIA() {
+        const fileInput = document.getElementById('imageInput');
+        const promptInput = document.getElementById('promptInput').value;
+        const statusDiv = document.getElementById('status');
+        const btn = document.getElementById('btnLancer');
+        const imgSortie = document.getElementById('resultatImg');
+
+        if (!fileInput.files[0] || !promptInput) {
+            alert("Veuillez choisir une image et écrire un texte.");
+            return;
+        }
+
+        btn.disabled = true;
+        statusDiv.innerText = "Initialisation... (Le téléchargement initial peut durer plusieurs minutes)";
+
+        try {
+            if (!generateur) {
+                // Chargement du modèle de génération d'image
+                generateur = await window.pipeline('image-to-image', 'Xenova/stable-diffusion-2-1-base', {
+                    quantized: true, // Réduit la taille pour le web
+                });
+            }
+
+            statusDiv.innerText = "Calcul en cours... (Ne pas fermer la page)";
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const output = await generateur(e.target.result, {
+                        prompt: promptInput,
+                        strength: 0.7,
+                        guidance_scale: 7.5
+                    });
+                    
+                    // Création d'une URL pour l'image générée
+                    imgSortie.src = URL.createObjectURL(output[0].blob);
+                    imgSortie.style.display = "block";
+                    statusDiv.innerText = "Terminé !";
+                } catch (err) {
+                    statusDiv.innerText = "Erreur pendant le calcul : " + err.message;
+                }
+                btn.disabled = false;
+            };
+            reader.readAsDataURL(fileInput.files[0]);
+
+        } catch (error) {
+            statusDiv.innerText = "Erreur critique : " + error.message;
+            console.error(error);
+            btn.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>
