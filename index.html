@@ -2,47 +2,18 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>IA 100% Navigateur</title>
-    <script type="module">
-        import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.14.0';
-        window.pipeline = pipeline;
-    </script>
+    <link rel="stylesheet" href="style.css">
+    <title>IA Locale</title>
 </head>
 <body>
-    <h1>🎨 IA Locale</h1>
-    <input type="file" id="imageInput" accept="image/*">
-    <input type="text" id="promptInput" placeholder="Ex: A futuristic city">
-    <button id="btnLancer" onclick="demarrerIA()">🚀 Générer</button>
-    <div id="status">En attente...</div>
-    <img id="resultatImg" style="display:none; max-width: 300px;">
-
-    <script>
-        let generateur = null;
-        async function demarrerIA() {
-            const statusDiv = document.getElementById('status');
-            const prompt = document.getElementById('promptInput').value;
-            const file = document.getElementById('imageInput').files[0];
-            
-            if (!file || !prompt) return alert("Image et texte requis !");
-
-            statusDiv.innerText = "Chargement en cours (Patiente ~1 minute)...";
-            
-            try {
-                // On utilise un modèle encore plus "ouvert" et léger
-                if (!generateur) {
-                    generateur = await window.pipeline('image-to-image', 'Xenova/resnet-50');
-                }
-                
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    const result = await generateur(e.target.result);
-                    statusDiv.innerText = "Résultat : " + JSON.stringify(result[0]);
-                };
-                reader.readAsDataURL(file);
-            } catch (err) {
-                statusDiv.innerText = "Erreur : " + err.message;
-            }
-        }
-    </script>
+    <div class="container">
+        <h1>🎨 IA Locale</h1>
+        <input type="file" id="imageInput" accept="image/*">
+        <input type="text" id="promptInput" placeholder="Ex: A futuristic city">
+        <button id="btnLancer">🚀 Générer</button>
+        <div id="status">En attente...</div>
+        <img id="resultatImg" style="display:none;">
+    </div>
+    <script type="module" src="app.js"></script>
 </body>
 </html>
