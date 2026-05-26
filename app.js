@@ -4,23 +4,21 @@ const btn = document.getElementById('btnLancer');
 const statusDiv = document.getElementById('status');
 
 btn.addEventListener('click', async () => {
-    const file = document.getElementById('imageInput').files[0];
-    const prompt = document.getElementById('promptInput').value;
+    const fileInput = document.getElementById('imageInput');
+    if (!fileInput.files[0]) return alert("Choisis une image !");
 
-    if (!file || !prompt) return alert("Remplis tout !");
-
-    statusDiv.innerText = "Téléchargement et traitement...";
+    statusDiv.innerText = "Analyse en cours...";
     
     try {
-        // Utilisation d'un modèle de classification plus léger pour éviter les erreurs 403
-        const classifier = await pipeline('image-classification', 'Xenova/resnet-50');
+        // Utilisation d'un modèle de classification ultra-stable
+        const detector = await pipeline('image-classification', 'Xenova/mobilenetv2-1.0');
         
         const reader = new FileReader();
         reader.onload = async (e) => {
-            const result = await classifier(e.target.result);
-            statusDiv.innerText = "IA : Je pense que c'est un " + result[0].label;
+            const result = await detector(e.target.result);
+            statusDiv.innerText = "L'IA voit : " + result[0].label;
         };
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(fileInput.files[0]);
     } catch (err) {
         statusDiv.innerText = "Erreur : " + err.message;
     }
