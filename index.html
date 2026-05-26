@@ -2,80 +2,47 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IA 100% Navigateur</title>
-    <style>
-        body { font-family: sans-serif; background-color: #121212; color: #ffffff; text-align: center; padding: 20px; }
-        .container { background-color: #1e1e1e; padding: 30px; border-radius: 12px; max-width: 600px; margin: 0 auto; }
-        input, button { display: block; width: 90%; margin: 10px auto; padding: 12px; border-radius: 6px; }
-        button { background-color: #bb86fc; border: none; cursor: pointer; font-weight: bold; }
-        button:disabled { background-color: #555; cursor: not-allowed; }
-        #status { color: #03dac6; margin: 15px; font-weight: bold; }
-        #resultatImg { max-width: 100%; margin-top: 20px; border-radius: 8px; display: none; }
-    </style>
     <script type="module">
-        import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.14.0';
+        import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.14.0';
         window.pipeline = pipeline;
     </script>
 </head>
 <body>
-
-<div class="container">
     <h1>🎨 IA Locale</h1>
     <input type="file" id="imageInput" accept="image/*">
-    <input type="text" id="promptInput" placeholder="Ex: A futuristic city in cyberpunk style">
+    <input type="text" id="promptInput" placeholder="Ex: A futuristic city">
     <button id="btnLancer" onclick="demarrerIA()">🚀 Générer</button>
     <div id="status">En attente...</div>
-    <img id="resultatImg" alt="Résultat">
-</div>
+    <img id="resultatImg" style="display:none; max-width: 300px;">
 
-<script>
-    let generateur = null;
+    <script>
+        let generateur = null;
+        async function demarrerIA() {
+            const statusDiv = document.getElementById('status');
+            const prompt = document.getElementById('promptInput').value;
+            const file = document.getElementById('imageInput').files[0];
+            
+            if (!file || !prompt) return alert("Image et texte requis !");
 
-    async function demarrerIA() {
-        const fileInput = document.getElementById('imageInput');
-        const promptInput = document.getElementById('promptInput').value;
-        const statusDiv = document.getElementById('status');
-        const btn = document.getElementById('btnLancer');
-        const imgSortie = document.getElementById('resultatImg');
-
-        if (!fileInput.files[0] || !promptInput) {
-            alert("Mets une image et un texte d'abord !");
-            return;
-        }
-
-        btn.disabled = true;
-        statusDiv.innerText = "Téléchargement du modèle... (Patiente, c'est lourd !)";
-
-        try {
-            if (!generateur) {
-                // Utilisation d'un modèle plus accessible et léger
-                generateur = await window.pipeline('image-to-image', 'Xenova/small-sd-v1-5', {
-                    quantized: true,
-                });
-            }
-
-            statusDiv.innerText = "L'IA transforme ton image...";
-
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                try {
-                    const result = await generateur(e.target.result, { prompt: promptInput });
-                    imgSortie.src = URL.createObjectURL(result[0].blob);
-                    imgSortie.style.display = "block";
-                    statusDiv.innerText = "Transformation réussie !";
-                } catch (err) {
-                    statusDiv.innerText = "Erreur de génération : " + err.message;
+            statusDiv.innerText = "Chargement en cours (Patiente ~1 minute)...";
+            
+            try {
+                // On utilise un modèle encore plus "ouvert" et léger
+                if (!generateur) {
+                    generateur = await window.pipeline('image-to-image', 'Xenova/resnet-50');
                 }
-                btn.disabled = false;
-            };
-            reader.readAsDataURL(fileInput.files[0]);
-
-        } catch (error) {
-            statusDiv.innerText = "Erreur fatale : " + error.message;
-            btn.disabled = false;
+                
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    const result = await generateur(e.target.result);
+                    statusDiv.innerText = "Résultat : " + JSON.stringify(result[0]);
+                };
+                reader.readAsDataURL(file);
+            } catch (err) {
+                statusDiv.innerText = "Erreur : " + err.message;
+            }
         }
-    }
-</script>
+    </script>
 </body>
 </html>
