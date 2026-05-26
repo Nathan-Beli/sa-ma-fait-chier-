@@ -2,18 +2,24 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="style.css">
-    <title>IA Locale</title>
+    <title>Générateur d'Images IA</title>
+    <style>
+        body { background: #121212; color: white; text-align: center; font-family: sans-serif; }
+        .container { max-width: 500px; margin: 50px auto; padding: 20px; background: #1e1e1e; border-radius: 15px; }
+        input { width: 80%; padding: 10px; margin: 10px; border-radius: 5px; border: none; }
+        button { background: #bb86fc; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+        #imageResult { margin-top: 20px; width: 100%; border-radius: 10px; display: none; }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎨 IA Locale</h1>
-        <input type="file" id="imageInput" accept="image/*">
-        <input type="text" id="promptInput" placeholder="Ex: A futuristic city">
-        <button id="btnLancer">🚀 Générer</button>
-        <div id="status">En attente...</div>
-        <img id="resultatImg" style="display:none;">
+        <h1>🎨 Générateur IA</h1>
+        <input type="text" id="prompt" placeholder="Décris ton image (en anglais)...">
+        <button id="generateBtn">Générer</button>
+        <p id="status"></p>
+        <img id="imageResult" alt="Résultat">
     </div>
+
     <script type="module" src="app.js"></script>
 </body>
 </html>
